@@ -1,6 +1,6 @@
 """Prototype obtaining data from ESPN page and creating ICAL for Flu matches."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 
 import requests
@@ -39,7 +39,9 @@ def get_matches(url: str) -> List[Match]:
                     continue
                 # Text is one hour late, DST somewhere?
                 dt_start=datetime(year=year, month=month, day=day, hour=int(hour_minute[0]) + 1,
-                                  minute=int(hour_minute[1]))
+                                  minute=int(hour_minute[1]),
+                                  # Obtaining local timezone: https://stackoverflow.com/a/39079819/1259982
+                                  tzinfo=datetime.now(timezone.utc).astimezone().tzinfo)
                 matches.append(Match(home_team=tds[1].text, away_team=tds[3].text,
                                      dt_start=dt_start,
                                      dt_end=dt_start + timedelta(minutes=105),

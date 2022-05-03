@@ -1,6 +1,6 @@
 """Prototype obtaining data from ESPN page and creating ICAL for Flu matches."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 from typing import Optional, List
 
 import requests
@@ -14,9 +14,15 @@ class Match(BaseModel):
     home_team: str
     away_team: str
     dt_start: datetime
-    dt_end: datetime
+    # If dt_end is not defined then we assume that the match day
+    # is fixed but the time is not. This is included in the calendar
+    # as a all day event.
+    dt_end: Optional[datetime]
     comments: Optional[str]
 
+    def time_defined(self) -> bool:
+        """True if match has time defined, false if only the day is defined."""
+        return self.dt_end is not None
 
 def get_matches(url: str) -> List[Match]:
     """Obtain matches by parsing URL."""
@@ -35,17 +41,22 @@ def get_matches(url: str) -> List[Match]:
                 day = int(tds[0].text.split(" ")[1])
                 hour_minute = tds[4].text.split(":")
                 if len(hour_minute) != 2:
-                    # No time defined yet, skipping for now.
-                    continue
-                # Text is one hour late, DST somewhere?
-                dt_start=datetime(year=year, month=month, day=day, hour=int(hour_minute[0]) + 1,
-                                  minute=int(hour_minute[1]),
-                                  # Obtaining local timezone: https://stackoverflow.com/a/39079819/1259982
-                                  tzinfo=datetime.now(timezone.utc).astimezone().tzinfo)
-                matches.append(Match(home_team=tds[1].text, away_team=tds[3].text,
-                                     dt_start=dt_start,
-                                     dt_end=dt_start + timedelta(minutes=105),
-                                     comments=tds[5].text))
+                    # No time defined yet, adding as a full day event
+                    dt_start = datetime(year=year,month=month,day=day)
+                    matches.append(Match(home_team=tds[1].text, away_team=tds[3].text,
+                                         dt_start=dt_start,
+                                         comments=tds[5].text))
+
+                else:
+                    # Text is one hour late, DST somewhere?
+                    dt_start=datetime(year=year, month=month, day=day, hour=int(hour_minute[0]) + 1,
+                                      minute=int(hour_minute[1]),
+                                      # Obtaining local timezone: https://stackoverflow.com/a/39079819/1259982
+                                      tzinfo=datetime.now(timezone.utc).astimezone().tzinfo)
+                    matches.append(Match(home_team=tds[1].text, away_team=tds[3].text,
+                                         dt_start=dt_start,
+                                         dt_end=dt_start + timedelta(minutes=105),
+                                         comments=tds[5].text))
                 #print(f"\t{tds[0].text} {tds[1].text} {tds[3].text} {tds[4].text} {tds[5].text}")
                 #print(match)
     return matches
@@ -57,14 +68,20 @@ def build_calendar(matches: List[Match]) -> Calendar:
     for match in matches:
         event = Event()
         event.add("summary", f"{match.home_team} x {match.away_team}")
-        event.add("dtstart", match.dt_start)
-        event.add("dtend", match.dt_end)
+        if match.time_defined():
+            event.add("dtstart", match.dt_start)
+            event.add("dtend", match.dt_end)
+        else:
+            event.add("dtstart", match.dt_start.date())
         cal.add_component(event)
+    # event = Event()
+    # event.add("dtstart", date.today())
+    # cal.add_component(event)
     return cal
 
 if __name__ == "__main__":
     matches = get_matches(url="https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense")
     print(matches)
     calendar = build_calendar(matches)
-    with open("fluminense.ical", "w") as fp_ical:
+    with open("fluminense.ics", "w") as fp_ical:
         fp_ical.write(calendar.to_ical().decode("utf-8"))

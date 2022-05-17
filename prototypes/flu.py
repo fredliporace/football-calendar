@@ -24,7 +24,7 @@ class Match(BaseModel):
         """True if match has time defined, false if only the day is defined."""
         return self.dt_end is not None
 
-def get_matches(url: str) -> List[Match]:
+def get_matches(url: str, delta_hour: int) -> List[Match]:
     """Obtain matches by parsing URL."""
     matches = []
     req = requests.get(url)
@@ -48,8 +48,7 @@ def get_matches(url: str) -> List[Match]:
                                          comments=tds[5].text))
 
                 else:
-                    # Text is one hour late, DST somewhere?
-                    dt_start=datetime(year=year, month=month, day=day, hour=int(hour_minute[0]) + 1,
+                    dt_start=datetime(year=year, month=month, day=day, hour=int(hour_minute[0]) + delta_hour,
                                       minute=int(hour_minute[1]),
                                       # Obtaining local timezone: https://stackoverflow.com/a/39079819/1259982
                                       tzinfo=datetime.now(timezone.utc).astimezone().tzinfo)
@@ -80,7 +79,8 @@ def build_calendar(matches: List[Match]) -> Calendar:
     return cal
 
 if __name__ == "__main__":
-    matches = get_matches(url="https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense")
+    matches = get_matches(url="https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense",
+                          delta_hour=1)
     print(matches)
     calendar = build_calendar(matches)
     with open("fluminense.ics", "w") as fp_ical:

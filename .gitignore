@@ -2,3 +2,4 @@
 /.dir-locals.el
 /football_calendar.egg-info/
 /.mypy_cache/
+__pycache__

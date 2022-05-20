@@ -13,9 +13,9 @@ from pydantic import BaseModel
 class Match(BaseModel):  # pylint: disable=too-few-public-methods
     """A match."""
 
+    dt_start: datetime
     home_team: str
     away_team: str
-    dt_start: datetime
     # If dt_end is not defined then we assume that the match day
     # is fixed but the time is not. This is included in the calendar
     # as a all day event.

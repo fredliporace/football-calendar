@@ -15,3 +15,11 @@ Install `pre-commit` to run *isort*, *pylint*, *pydocstring*, *black* and *mypy*
 ```bash
 $ pre-commit install
 ```
+
+### act
+
+Use [act](https://github.com/nektos/act) to test github actions locally:
+
+```bash
+act --reuse -j tests
+```

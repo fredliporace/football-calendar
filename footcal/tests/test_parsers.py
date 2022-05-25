@@ -1,7 +1,39 @@
 """test parsers."""
+from datetime import datetime
+
 import pytest
 
+from footcal import Match
 from footcal.parsers import ESPNParser, Parser
+
+# protected access for testing purposes only
+# pylint: disable=protected-access
+
+
+def test_parser_calendar_from_matches() -> None:
+    """test_parser_calendar_from_matches."""
+    matches = [
+        Match(
+            home_team="Fluminense",
+            away_team="Rio Cricket Athletic",
+            dt_start=datetime(2015, 1, 1, 12, 30, 59, 0),
+            dt_end=datetime(2015, 1, 1, 12, 30, 59, 0),
+        ),
+        Match(
+            home_team="Fluminense",
+            away_team="Rio Cricket Athletic",
+            dt_start=datetime(2015, 1, 2),
+        ),
+    ]
+    cal = Parser._calendar_from_matches(calendar_name="Fluminense", matches=matches)
+    assert (
+        cal.to_ical() == b"BEGIN:VCALENDAR\r\nNAME:Fluminense\r\n"
+        b"BEGIN:VEVENT\r\nSUMMARY:Fluminense x Rio Cricket Athletic\r\n"
+        b"DTSTART;VALUE=DATE-TIME:20150101T123059\r\nDTEND;"
+        b"VALUE=DATE-TIME:20150101T123059\r\nEND:"
+        b"VEVENT\r\nBEGIN:VEVENT\r\nSUMMARY:Fluminense x Rio Cricket Athletic\r\n"
+        b"DTSTART;VALUE=DATE:20150102\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+    )
 
 
 def test_parser_subclasses() -> None:
@@ -23,7 +55,17 @@ def test_parser() -> None:
 def test_espn_parser() -> None:
     """test_espn_parser."""
     espn = ESPNParser(delta_hour=1)
+
+    # Check last available format
+    with open("footcal/tests/fixtures/espn_flu.html", encoding="utf-8") as fin:
+        html_text = fin.read()
+    matches = espn.matches_from_str(html_text=html_text)
+    assert len(matches) == 32
+
+    # Check current online format, test here is limited since it
+    # is not guaranteed that there will be a match. Anyway this works
+    # as a canary to flag format changes.
     matches = espn.get_matches(
         url="https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense"
     )
-    assert len(matches) == 33
+    assert len(matches) > 0

@@ -7,6 +7,7 @@ from typing import List
 import requests
 from babel.dates import get_month_names
 from bs4 import BeautifulSoup
+from icalendar import Calendar, Event
 from pydantic import BaseModel
 
 from footcal import Match
@@ -21,6 +22,33 @@ class Parser(BaseModel, ABC):
         if req.status_code != 200:
             raise RuntimeError(f"HTTP error {req.status_code}.")
         return self.matches_from_str(req.text)
+
+    @staticmethod
+    def _calendar_from_matches(calendar_name: str, matches: List[Match]) -> Calendar:
+        """Build a calendar from a match list.
+
+        Args:
+          calendar_name: The calendar name.
+          matches: List of matches.
+
+        Returns:
+          Calendar.
+        """
+        cal = Calendar()
+        cal.add("name", calendar_name)
+        for match in matches:
+            event = Event()
+            event.add("summary", f"{match.home_team} x {match.away_team}")
+            if match.time_defined():
+                event.add("dtstart", match.dt_start)
+                event.add("dtend", match.dt_end)
+            else:
+                event.add("dtstart", match.dt_start.date())
+            cal.add_component(event)
+            # event = Event()
+            # event.add("dtstart", date.today())
+            # cal.add_component(event)
+        return cal
 
     @abstractmethod
     def matches_from_str(self, html_text: str) -> List[Match]:

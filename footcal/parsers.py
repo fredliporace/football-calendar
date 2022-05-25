@@ -58,7 +58,12 @@ class Parser(BaseModel, ABC):
 class ESPNParser(Parser):
     """Parser from ESPN fixture site."""
 
+    # This is added to the schedule hour, may change depending
+    # on your timzone
     delta_hour: int = 0
+    # This is used to translate month abbreviated names (jan, fev, etc.) to their
+    # indexes (0, 1, etc.)
+    locale: str = "pt_BR"
 
     def matches_from_str(self, html_text: str) -> List[Match]:
         """todo: reference documentation from base class."""
@@ -74,7 +79,7 @@ class ESPNParser(Parser):
                 if len(tds) == 7:
                     month = (
                         list(
-                            get_month_names("abbreviated", locale="pt_BR").values()
+                            get_month_names("abbreviated", locale=self.locale).values()
                         ).index(tds[0].text.split(" ")[2])
                         + 1
                     )

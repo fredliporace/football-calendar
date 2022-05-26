@@ -45,9 +45,6 @@ class Parser(BaseModel, ABC):
             else:
                 event.add("dtstart", match.dt_start.date())
             cal.add_component(event)
-            # event = Event()
-            # event.add("dtstart", date.today())
-            # cal.add_component(event)
         return cal
 
     @abstractmethod
@@ -61,8 +58,8 @@ class ESPNParser(Parser):
     # This is added to the schedule hour, may change depending
     # on your timzone
     delta_hour: int = 0
-    # This is used to translate month abbreviated names (jan, fev, etc.) to their
-    # indexes (0, 1, etc.)
+    # This is used to translate month abbreviated names (jan, fev, ...) to their
+    # indexes (0, 1, ...)
     locale: str = "pt_BR"
 
     def matches_from_str(self, html_text: str) -> List[Match]:

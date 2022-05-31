@@ -34,47 +34,47 @@ def get_matches(url: str, delta_hour: int) -> List[Match]:
     soup = BeautifulSoup(req.text, features="html.parser")
     for title in soup.find_all("div", "Table__Title"):
         # print(title.text)
+        trs = title.parent.find_all("tr")
         year = int(title.text.split(", ")[1])
         # print(year)
-        trs = title.parent.find_all("tr")
         for tri in trs:
             tds = tri.find_all("td")
             if len(tds) == 7:
+                day = int(tds[0].text.split(" ")[1])
+                hour_minute = tds[4].text.split(":")
                 month = (
                     list(get_month_names("abbreviated", locale="pt_BR").values()).index(
                         tds[0].text.split(" ")[2]
                     )
                     + 1
                 )
-                day = int(tds[0].text.split(" ")[1])
-                hour_minute = tds[4].text.split(":")
                 if len(hour_minute) != 2:
                     # No time defined yet, adding as a full day event
                     dt_start = datetime(year=year, month=month, day=day)
                     matches.append(
                         Match(
+                            dt_start=dt_start,
                             home_team=tds[1].text,
                             away_team=tds[3].text,
-                            dt_start=dt_start,
                             comments=tds[5].text,
                         )
                     )
 
                 else:
                     dt_start = datetime(
+                        hour=int(hour_minute[0]) + delta_hour,
                         year=year,
                         month=month,
                         day=day,
-                        hour=int(hour_minute[0]) + delta_hour,
                         minute=int(hour_minute[1]),
                         # Obtaining local timezone: https://stackoverflow.com/a/39079819/1259982
                         tzinfo=datetime.now(timezone.utc).astimezone().tzinfo,
                     )
                     matches.append(
                         Match(
+                            dt_start=dt_start,
                             home_team=tds[1].text,
                             away_team=tds[3].text,
-                            dt_start=dt_start,
                             dt_end=dt_start + timedelta(minutes=105),
                             comments=tds[5].text,
                         )
@@ -92,8 +92,8 @@ def build_calendar(matches: List[Match]) -> Calendar:
         event = Event()
         event.add("summary", f"{match.home_team} x {match.away_team}")
         if match.time_defined():
-            event.add("dtstart", match.dt_start)
             event.add("dtend", match.dt_end)
+            event.add("dtstart", match.dt_start)
         else:
             event.add("dtstart", match.dt_start.date())
         cal.add_component(event)

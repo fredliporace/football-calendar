@@ -49,7 +49,7 @@ jobs:
           python -m pip install --upgrade wheel $pip_extras
           python -m pip install tox codecov $pip_extras
           # Needed to install pylint and all imported packages
-          python -m pip install -e .[dev] $pip_extras
+          python -m pip install -e .[dev,cli] $pip_extras
 
       # Run pre-commit for all files
       - name: Run pre-commit

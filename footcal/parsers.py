@@ -23,6 +23,13 @@ class Parser(BaseModel, ABC):
             raise RuntimeError(f"HTTP error {req.status_code}.")
         return self.matches_from_str(req.text)
 
+    def get_calendar(self, url: str, calendar_name: str) -> Calendar:
+        """Get Calendar from a given URL."""
+        matches = self.get_matches(url=url)
+        return Parser._calendar_from_matches(
+            calendar_name=calendar_name, matches=matches
+        )
+
     @staticmethod
     def _calendar_from_matches(calendar_name: str, matches: List[Match]) -> Calendar:
         """Build a calendar from a match list.

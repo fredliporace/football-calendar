@@ -65,7 +65,10 @@ def test_espn_parser() -> None:
     # Check current online format, test here is limited since it
     # is not guaranteed that there will be a match. Anyway this works
     # as a canary to flag format changes.
-    matches = espn.get_matches(
-        url="https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense"
-    )
+    test_url = "https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense"
+    matches = espn.get_matches(url=test_url)
     assert len(matches) > 0
+
+    calendar = espn.get_calendar(url=test_url, calendar_name="test")
+    assert not calendar.is_empty()
+    assert not calendar.is_broken

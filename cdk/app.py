@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from aws_cdk import App, CfnOutput, Stack
+from aws_cdk import App, CfnOutput, Duration, Stack
 from aws_cdk.aws_lambda import Code, Function, FunctionUrl, FunctionUrlAuthType, Runtime
 
 
@@ -20,6 +20,7 @@ class FootcalStack(Stack):  # type: ignore
             runtime=Runtime.PYTHON_3_7,
             handler="code.handler",
             code=Code.from_asset(path=str(Path(__file__).parent / "lambda")),
+            timeout=Duration.seconds(10),
             # Resource handler returned message: "Specified ReservedConcurrentExecutions
             # for function decreases account's
             # UnreservedConcurrentExecution below its minimum value of [10]

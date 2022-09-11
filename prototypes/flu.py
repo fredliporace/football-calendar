@@ -30,7 +30,7 @@ class Match(BaseModel):  # pylint: disable=too-few-public-methods
 def get_matches(url: str, delta_hour: int) -> List[Match]:
     """Obtain matches by parsing URL."""
     matches = []
-    req = requests.get(url)
+    req = requests.get(url, timeout=10)
     soup = BeautifulSoup(req.text, features="html.parser")
     for title in soup.find_all("div", "Table__Title"):
         # print(title.text)

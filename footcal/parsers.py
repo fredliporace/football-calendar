@@ -2,19 +2,35 @@
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta, timezone
-from typing import List
+from typing import List, Optional
 
 import requests
 from babel.dates import get_month_names
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr
 
 from footcal import Match
 
 
 class Parser(BaseModel, ABC):
     """A generic football fixture parser."""
+
+    # UTC offset in hours for input calendar dates.
+    utc_offset: int = 0
+
+    # This is used to translate month abbreviated names (jan, fev, ...) to their
+    # indexes (0, 1, ...)
+    locale: Optional[str] = "pt_BR"
+
+    # timezone built from utc_offset
+    _tzone: timezone = PrivateAttr()
+
+    # **data may be typed with typing.ParamSpec for python 3.10
+    def __init__(self, **data):  # type: ignore
+        """Ctor."""
+        super().__init__(**data)
+        self._tzone = timezone(timedelta(hours=self.utc_offset))
 
     def get_matches(self, url: str) -> List[Match]:
         """Get matches from a given URL."""
@@ -62,13 +78,6 @@ class Parser(BaseModel, ABC):
 class ESPNParser(Parser):
     """Parser from ESPN fixture site."""
 
-    # This is added to the schedule hour, may change depending
-    # on your timzone
-    delta_hour: int = 0
-    # This is used to translate month abbreviated names (jan, fev, ...) to their
-    # indexes (0, 1, ...)
-    locale: str = "pt_BR"
-
     def matches_from_str(self, html_text: str) -> List[Match]:
         """todo: reference documentation from base class."""
         matches = []
@@ -106,10 +115,9 @@ class ESPNParser(Parser):
                             year=year,
                             month=month,
                             day=day,
-                            hour=int(hour_minute[0]) + self.delta_hour,
+                            hour=int(hour_minute[0]),
                             minute=int(hour_minute[1]),
-                            # Obtaining local timezone: https://stackoverflow.com/a/39079819/1259982
-                            tzinfo=datetime.now(timezone.utc).astimezone().tzinfo,
+                            tzinfo=self._tzone,
                         )
                         matches.append(
                             Match(

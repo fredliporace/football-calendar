@@ -54,13 +54,15 @@ def test_parser() -> None:
 
 def test_espn_parser() -> None:
     """test_espn_parser."""
-    espn = ESPNParser(delta_hour=1)
+    espn = ESPNParser(utc_offset=-4)
 
     # Check last available format
     with open("footcal/tests/fixtures/espn_flu.html", encoding="utf-8") as fin:
         html_text = fin.read()
     matches = espn.matches_from_str(html_text=html_text)
     assert len(matches) == 32
+    # Must be equivalent to "2022-05-26T21:30:00-03:00"
+    assert matches[0].dt_start.isoformat() == "2022-05-26T20:30:00-04:00"
 
     # Check current online format, test here is limited since it
     # is not guaranteed that there will be a match. Anyway this works

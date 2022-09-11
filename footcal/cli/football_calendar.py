@@ -15,6 +15,22 @@ from footcal.parsers import ESPNParser
     show_default=True,
 )
 @click.option(  # type: ignore
+    "--utc_offset",
+    "-d",
+    type=click.INT,
+    help="Delta UTC hours to be for matches times.",
+    default=0,
+    show_default=True,
+)
+@click.option(  # type: ignore
+    "--locale",
+    "-l",
+    type=click.STRING,
+    help="Locale used to parse data such as month abbreviated names.",
+    default="pt_BR",
+    show_default=True,
+)
+@click.option(  # type: ignore
     "--url",
     "-u",
     type=click.STRING,
@@ -23,7 +39,12 @@ from footcal.parsers import ESPNParser
     default="https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense",
     show_default=True,
 )
-def footcal(name: str, url: str) -> None:  # pylint: disable=unused-argument
+def footcal(
+    name: click.STRING,  # pylint: disable=unused-argument
+    utc_offset: click.INT,  # pylint: disable=unused-argument
+    locale: click.STRING,  # pylint: disable=unused-argument
+    url: click.STRING,  # pylint: disable=unused-argument
+) -> None:
     """Create an icalendar from web fixtures.
 
     The calendar is dumped to stdout.
@@ -34,26 +55,12 @@ def footcal(name: str, url: str) -> None:  # pylint: disable=unused-argument
 # reported:
 #   Untyped decorator makes function "espn" untyped
 @footcal.command()  # type: ignore
-@click.option(  # type: ignore
-    "--delta_hour",
-    "-d",
-    type=click.INT,
-    help="Delta hours to be applied in match time.",
-    default=1,
-    show_default=True,
-)
-@click.option(  # type: ignore
-    "--locale",
-    "-l",
-    type=click.STRING,
-    help="Locale used to parse month abbreviated names.",
-    default="pt_BR",
-    show_default=True,
-)
 @click.pass_context  # type: ignore
-def espn(ctx: click.core.Context, delta_hour: click.INT, locale: click.STRING) -> None:
+def espn(ctx: click.core.Context) -> None:
     """Fixures from ESPN website."""
-    parser = ESPNParser(delta_hour=delta_hour, locale=locale)
+    parser = ESPNParser(
+        utc_offset=ctx.parent.params["utc_offset"], locale=ctx.parent.params["locale"]
+    )
     calendar = parser.get_calendar(
         url=ctx.parent.params["url"], calendar_name=ctx.parent.params["name"]
     )

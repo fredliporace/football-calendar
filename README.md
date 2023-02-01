@@ -47,6 +47,10 @@ $ pip install .[aws]
 pip install . --upgrade -t ./cdk/lambda/
 ```
 
+```bash
+cd cdk && cdk deploy
+```
+
 ### act
 
 Use [act](https://github.com/nektos/act) to test github actions locally:

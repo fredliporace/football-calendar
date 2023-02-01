@@ -10,7 +10,7 @@ def handler(
 ) -> Dict[str, Any]:
     """Lambda handler."""
     # Need to explicitly pass timezone, see #1
-    parser = ESPNParser(utc_offset=-4, locale="pt_BR")
+    parser = ESPNParser(utc_offset=-3, locale="pt_BR")
     calendar = parser.get_calendar(
         url="https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense",
         calendar_name="Calendar",

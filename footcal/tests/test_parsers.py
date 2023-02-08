@@ -29,8 +29,7 @@ def test_parser_calendar_from_matches() -> None:
     assert (
         cal.to_ical() == b"BEGIN:VCALENDAR\r\nNAME:Fluminense\r\n"
         b"BEGIN:VEVENT\r\nSUMMARY:Fluminense x Rio Cricket Athletic\r\n"
-        b"DTSTART;VALUE=DATE-TIME:20150101T123059\r\nDTEND;"
-        b"VALUE=DATE-TIME:20150101T123059\r\nEND:"
+        b"DTSTART:20150101T123059\r\nDTEND:20150101T123059\r\nEND:"
         b"VEVENT\r\nBEGIN:VEVENT\r\nSUMMARY:Fluminense x Rio Cricket Athletic\r\n"
         b"DTSTART;VALUE=DATE:20150102\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
     )

@@ -16,9 +16,19 @@ Install `pre-commit` to run *isort*, *pylint*, *pydocstring*, *black* and *mypy*
 $ pre-commit install
 ```
 
+### act
+
+Use [act](https://github.com/nektos/act) to test github actions locally:
+
+```bash
+act --reuse -j tests
+```
+
 ## Deploy to AWS
 
-Deployment to AWS uses CDK.
+The application may be deployed to AWS using CDK.
+
+### CDK configuration
 
 Requirements:
 * node: Use [nvm](https://heynode.com/tutorial/install-nodejs-locally-nvm/) to make sure a supported node is being used, tested with 16.16.0
@@ -34,27 +44,31 @@ $ aws sts get-caller-identity
 
 # Bootstrap
 $ cdk bootstrap aws://ACCOUNT-NUMBER/REGION
-
 ```
 
-?? complete documentation
+To install the aws packages required for deployment:
 
 ```bash
-$ pip install .[aws]
+$ pip install -e .[aws]
 ```
+
+### Deploy to lambda function
+
+To install the lambda function requirements:
 
 ```bash
 pip install . --upgrade -t ./cdk/lambda/
 ```
 
+To deploy to lambda function:
+
 ```bash
 cd cdk && cdk deploy
 ```
 
-### act
-
-Use [act](https://github.com/nektos/act) to test github actions locally:
+To clean the cdk lambda directory:
 
 ```bash
-act --reuse -j tests
+cd cdk/lambda
+rm -rf -v !("code.py")
 ```

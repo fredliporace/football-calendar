@@ -118,6 +118,7 @@ class ESPNParser(Parser):
                             hour=int(hour_minute[0]),
                             minute=int(hour_minute[1]),
                             tzinfo=self._tzone,
+                            # tzinfo=datetime.now().astimezone().tzinfo,
                         )
                         matches.append(
                             Match(

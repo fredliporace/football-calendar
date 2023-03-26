@@ -15,11 +15,11 @@ from footcal.parsers import ESPNParser
     show_default=True,
 )
 @click.option(  # type: ignore
-    "--utc_offset",
-    "-d",
-    type=click.INT,
-    help="Delta UTC hours to be for matches times.",
-    default=0,
+    "--timezone",
+    "-t",
+    type=click.STRING,
+    help="Calendar timezone.",
+    default="UTC",
     show_default=True,
 )
 @click.option(  # type: ignore
@@ -41,7 +41,7 @@ from footcal.parsers import ESPNParser
 )
 def footcal(
     name: click.STRING,  # pylint: disable=unused-argument
-    utc_offset: click.INT,  # pylint: disable=unused-argument
+    timezone: click.STRING,  # pylint: disable=unused-argument
     locale: click.STRING,  # pylint: disable=unused-argument
     url: click.STRING,  # pylint: disable=unused-argument
 ) -> None:
@@ -59,7 +59,7 @@ def footcal(
 def espn(ctx: click.core.Context) -> None:
     """Fixures from ESPN website."""
     parser = ESPNParser(
-        utc_offset=ctx.parent.params["utc_offset"], locale=ctx.parent.params["locale"]
+        timezone_id=ctx.parent.params["timezone"], locale=ctx.parent.params["locale"]
     )
     calendar = parser.get_calendar(
         url=ctx.parent.params["url"], calendar_name=ctx.parent.params["name"]

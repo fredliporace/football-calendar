@@ -1,14 +1,15 @@
 """parsers module."""
 
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 import requests
 from babel.dates import get_month_names
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel
+from pytz import timezone
 
 from footcal import Match
 
@@ -16,21 +17,17 @@ from footcal import Match
 class Parser(BaseModel, ABC):
     """A generic football fixture parser."""
 
-    # UTC offset in hours for input calendar dates.
-    utc_offset: int = 0
+    # Calendar timezone
+    timezone_id: str = "UTC"
 
     # This is used to translate month abbreviated names (jan, fev, ...) to their
     # indexes (0, 1, ...)
     locale: Optional[str] = "pt_BR"
 
-    # timezone built from utc_offset
-    _tzone: timezone = PrivateAttr()
-
     # **data may be typed with typing.ParamSpec for python 3.10
     def __init__(self, **data):  # type: ignore
         """Ctor."""
         super().__init__(**data)
-        self._tzone = timezone(timedelta(hours=self.utc_offset))
 
     def get_matches(self, url: str) -> List[Match]:
         """Get matches from a given URL."""
@@ -117,8 +114,7 @@ class ESPNParser(Parser):
                             day=day,
                             hour=int(hour_minute[0]),
                             minute=int(hour_minute[1]),
-                            tzinfo=self._tzone,
-                            # tzinfo=datetime.now().astimezone().tzinfo,
+                            tzinfo=timezone(self.timezone_id),
                         )
                         matches.append(
                             Match(

@@ -56,6 +56,7 @@ repos:
         additional_dependencies:
           - "pydantic"
           - "types-requests"
+          - "types-pytz"
         language_version: python3.7
         #args are defined in mypy.ini
         #args: ["--no-strict-optional", "--ignore-missing-imports"]

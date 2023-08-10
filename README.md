@@ -57,7 +57,7 @@ $ pip install -e .[aws]
 To install the lambda function requirements:
 
 ```bash
-pip install . --upgrade -t ./cdk/lambda/
+pip install . --upgrade -t ./cdk/lambda/ -c constraints.txt
 ```
 
 To deploy to lambda function:

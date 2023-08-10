@@ -31,7 +31,14 @@ class Parser(BaseModel, ABC):
 
     def get_matches(self, url: str) -> List[Match]:
         """Get matches from a given URL."""
-        req = requests.get(url, timeout=30)
+        req = requests.get(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+            },
+            timeout=30,
+        )
         if req.status_code != 200:
             raise RuntimeError(f"HTTP error {req.status_code}.")
         return self.matches_from_str(req.text)

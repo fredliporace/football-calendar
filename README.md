@@ -26,15 +26,15 @@ act --reuse -j tests
 
 ## Deploy to AWS
 
-The application may be deployed to AWS using CDK.
+The application may be deployed to AWS using CDK2.
 
 ### CDK configuration
 
 Requirements:
-* node: Use [nvm](https://heynode.com/tutorial/install-nodejs-locally-nvm/) to make sure a supported node is being used, tested with 16.16.0
+* node: Use [nvm](https://heynode.com/tutorial/install-nodejs-locally-nvm/) to make sure a supported node is being used, tested with 18.0.0
 * AWS credentials configured
 
-To install and check AWS CDK:
+To install and check AWS CDK (tested with CDK 2.130.0):
 ```bash
 $ npm install -g aws-cdk
 $ cdk --version

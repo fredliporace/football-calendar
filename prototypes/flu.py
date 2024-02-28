@@ -19,7 +19,7 @@ class Match(BaseModel):  # pylint: disable=too-few-public-methods
     # If dt_end is not defined then we assume that the match day
     # is fixed but the time is not. This is included in the calendar
     # as a all day event.
-    dt_end: Optional[datetime]
+    dt_end: Optional[datetime] = None
     comments: Optional[str]
 
     def time_defined(self) -> bool:

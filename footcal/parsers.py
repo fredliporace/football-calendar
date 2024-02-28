@@ -25,9 +25,10 @@ class Parser(BaseModel, ABC):
     locale: Optional[str] = "pt_BR"
 
     # **data may be typed with typing.ParamSpec for python 3.10
-    def __init__(self, **data):  # type: ignore
-        """Ctor."""
-        super().__init__(**data)
+    # No need to override since the same signature is used for base class
+    # def __init__(self, **data):  # type: ignore
+    #     """Ctor."""
+    #     super().__init__(**data)
 
     def get_matches(self, url: str) -> List[Match]:
         """Get matches from a given URL."""

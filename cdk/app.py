@@ -17,7 +17,7 @@ class FootcalStack(Stack):  # type: ignore
         lfun = Function(
             scope=self,
             id="footcal-lambda",
-            runtime=Runtime.PYTHON_3_7,
+            runtime=Runtime.PYTHON_3_9,
             handler="code.handler",
             code=Code.from_asset(path=str(Path(__file__).parent / "lambda")),
             timeout=Duration.seconds(10),

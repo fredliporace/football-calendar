@@ -58,4 +58,4 @@ jobs:
 
       - name: Tox
         run: |
-          tox -e py37-devel
+          tox -e py39-devel

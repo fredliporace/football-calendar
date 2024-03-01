@@ -1,0 +1,61 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: [3.9.13]
+    steps:
+
+      # Hacks
+      - run: |
+          # Hack to get setup-python to work on act
+          # https://github.com/nektos/act/issues/251#issuecomment-706412948
+          if [ ! -f "/etc/lsb-release" ] ; then
+            echo "DISTRIB_RELEASE=18.04" > /etc/lsb-release
+          fi
+
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Check cache for installed packages
+        if: ${{ !env.ACT }}
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-pip
+        with:
+          path: |
+            ~/.cache/pip
+          # Uncomment to include CI configuration as cache dependency
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('setup.py', 'constraints.txt', '**/ci.yml') }}
+          # Uncomment to exclude CI configuration as cache dependency
+          # key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('setup.py', 'constraints.txt') }}
+
+      - name: Install
+        run: |
+          pip_extras="-c constraints.txt"
+          python -m pip install --upgrade pip $pip_extras
+          # wheel installed to use cached .whl files
+          python -m pip install --upgrade wheel $pip_extras
+          python -m pip install tox codecov $pip_extras
+          # Needed to install pylint and all imported packages
+          python -m pip install -e .[dev,cli,aws] $pip_extras
+
+      # Run pre-commit for all files
+      - name: Run pre-commit
+        run: |
+          pre-commit run --all-files
+
+      - name: Tox
+        run: |
+          tox -e py39-devel

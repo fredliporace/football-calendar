@@ -55,6 +55,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - "pydantic"
+          - "pydantic-settings"
           - "types-requests"
           - "types-pytz"
         language_version: python3.9

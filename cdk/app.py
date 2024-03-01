@@ -26,7 +26,7 @@ class FootcalStack(Stack):  # type: ignore
         retcode = call("cp -u ./lambda/code.py ../cdk_build/lambda", shell=True)
         assert retcode == 0
         retcode = call(
-            "cd ../ && pip install . --upgrade -t ./cdk_build/lambda/ -c constraints.txt",
+            "cd ../ && pip install . -t ./cdk_build/lambda/ -c constraints.txt -q -q",
             shell=True,
         )
         assert retcode == 0

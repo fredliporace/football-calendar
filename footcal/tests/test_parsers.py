@@ -76,3 +76,16 @@ def test_espn_parser() -> None:
     calendar = espn.get_calendar(url=test_url, calendar_name="test")
     assert not calendar.is_empty()
     assert not calendar.is_broken
+
+
+def test_parser_from_name() -> None:
+    """test_parser_from_name."""
+    ctor = globals()["ESPNParser"]
+    inst = ctor(utc_offset=-4)
+    # Check last available format
+    with open("footcal/tests/fixtures/espn_flu.html", encoding="utf-8") as fin:
+        html_text = fin.read()
+    matches = inst.matches_from_str(html_text=html_text)
+    assert len(matches) > 0
+    with pytest.raises(KeyError):
+        ctor = globals()["UndefinedParser"]

@@ -1,30 +1,56 @@
 # football-calendar
 
-Generate ical files from football fixtures from web.
+Generate ical calendars from football fixtures from web.
 
-## Development
+Currently supports scraping the fixtures from ESPN website.
 
-After cloning the repository you are required to execute the following steps.
+May be used through CLI or deployed as a lambda function to AWS to support being imported to tools such as Google calendar.
 
-Install the package with *edit* mode and with the `dev` extra:
-```bash
-$ pip install -e .[dev]
-```
+## CLI
 
-Install `pre-commit` to run *isort*, *pylint*, *pydocstring*, *black* and *mypy* when committing new code.
-```bash
-$ pre-commit install
-```
-
-### act
-
-Use [act](https://github.com/nektos/act) to test github actions locally:
+Clone the repository and:
 
 ```bash
-act --reuse -j tests
+pip install -e .[cli]
 ```
 
-## Deploy to AWS
+The main command is `footcal`:
+
+```bash
+Usage: footcal [OPTIONS] COMMAND [ARGS]...
+
+  Create an icalendar from web fixtures.
+
+  The calendar is dumped to stdout.
+
+Options:
+  -n, --name TEXT      Calendar name.  [default: Calendar]
+  -t, --timezone TEXT  Calendar timezone.  [default: UTC]
+  -l, --locale TEXT    Locale used to parse data such as month abbreviated
+                       names.  [default: pt_BR]
+  -u, --url TEXT       URL for fixtures.  [default: https://www.espn.com.br/fu
+                       tebol/time/calendario/_/id/3445/fluminense; required]
+  --help               Show this message and exit.
+
+Commands:
+  espn  Fixures from ESPN website.
+```
+
+Example using default options and ESPN site:
+
+```bash
+(fb) [liporace@localhost football-calendar]$ footcal espn
+BEGIN:VCALENDAR
+NAME:Calendar
+BEGIN:VEVENT
+SUMMARY:Fluminense x Botafogo
+DTSTART:20240303T140000Z
+DTEND:20240303T154500Z
+END:VEVENT
+END:VCALENDAR
+```
+
+## AWS lambda function
 
 The application may be deployed to AWS using CDK2.
 
@@ -54,10 +80,18 @@ $ pip install -e .[aws]
 
 ### Deploy to lambda function
 
-To install the lambda function requirements:
+Create a `.env` file in `cdk/` with the lambda parameters. These specify the parser name (currently only `ESPNParser`) and the parameters to the parser constructor and `get_calendar` method. For instance:
 
-```bash
-pip install . --upgrade -t ./cdk/lambda/ -c constraints.txt
+```
+FOOTCAL_PARSER="ESPNParser"
+FOOTCAL_PARSER_CTOR_ARGS='{
+        "timezone_id":"US/Eastern",
+        "locale":"pt_BR"
+}'
+FOOTCAL_PARSER_GET_CALENDAR_ARGS='{
+        "url":"https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense",
+        "calendar_name":"Calendar"
+}'
 ```
 
 To deploy to lambda function:
@@ -66,9 +100,26 @@ To deploy to lambda function:
 cd cdk && cdk deploy
 ```
 
-To clean the cdk lambda directory:
+The output will be an URL that will output an updated calendar in ICAL format.
+
+## Development
+
+After cloning the repository you are required to execute the following steps.
+
+Install the package with *edit* mode and with the `dev` extra:
+```bash
+$ pip install -e .[dev]
+```
+
+Install `pre-commit` to run *isort*, *pylint*, *pydocstring*, *black* and *mypy* when committing new code.
+```bash
+$ pre-commit install
+```
+
+### act
+
+Use [act](https://github.com/nektos/act) to test github actions locally:
 
 ```bash
-cd cdk/lambda
-rm -rf -v !("code.py")
+act --reuse -j tests
 ```

@@ -1,4 +1,5 @@
 """test parsers."""
+
 from datetime import datetime
 
 import pytest
@@ -75,7 +76,7 @@ def test_espn_parser() -> None:
 
     calendar = espn.get_calendar(url=test_url, calendar_name="test")
     assert not calendar.is_empty()
-    assert not calendar.is_broken
+    assert calendar.validate()
 
 
 def test_parser_from_name() -> None:

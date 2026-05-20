@@ -57,10 +57,10 @@ The application may be deployed to AWS using CDK2.
 ### CDK configuration
 
 Requirements:
-* node: Use [nvm](https://heynode.com/tutorial/install-nodejs-locally-nvm/) to make sure a supported node is being used, tested with 18.0.0
+* node: Use [nvm](https://heynode.com/tutorial/install-nodejs-locally-nvm/) to make sure a supported node is being used, tested with 24.0.0
 * AWS credentials configured
 
-To install and check AWS CDK (tested with CDK 2.130.0):
+To install and check AWS CDK (tested with CDK 2.1124.1):
 ```bash
 $ npm install -g aws-cdk
 $ cdk --version
@@ -111,7 +111,7 @@ Install the package with *edit* mode and with the `dev` extra:
 $ pip install -e .[dev]
 ```
 
-Install `pre-commit` to run *isort*, *pylint*, *pydocstring*, *black* and *mypy* when committing new code.
+Install `pre-commit` to run *isort*, *pylint*, *pydocstyle*, *black* and *mypy* when committing new code.
 ```bash
 $ pre-commit install
 ```

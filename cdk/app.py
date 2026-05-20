@@ -10,6 +10,7 @@ from config import StackSettings
 
 SETTINGS = StackSettings()
 
+
 # Mypy, error: Class cannot subclass "Stack" (has type "Any")
 class FootcalStack(Stack):  # type: ignore
     """FootcalStack."""
@@ -33,7 +34,7 @@ class FootcalStack(Stack):  # type: ignore
         lfun = Function(
             scope=self,
             id="footcal-lambda",
-            runtime=Runtime.PYTHON_3_9,
+            runtime=Runtime.PYTHON_3_14,
             handler="code.handler",
             environment=self.lambda_env_,
             code=Code.from_asset(

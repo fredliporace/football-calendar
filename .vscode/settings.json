@@ -10,6 +10,7 @@
         "**/node_modules",
         "**/.venv",
         "**/cdk.out",
+        "**/cdk_build",
         "**/__pycache__",
         "**/.git",
         "**/dist",

@@ -90,8 +90,9 @@ FOOTCAL_PARSER_CTOR_ARGS='{
 }'
 FOOTCAL_PARSER_GET_CALENDAR_ARGS='{
         "url":"https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense",
-        "calendar_name":"Calendar"
+         "calendar_name":"Calendar"
 }'
+FOOTCAL_NOTIFICATION_EMAIL="myemail@example.com"
 ```
 
 To deploy to lambda function:

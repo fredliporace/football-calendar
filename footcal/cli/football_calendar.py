@@ -2,7 +2,7 @@
 
 import click
 
-from footcal.parsers import ESPNAPIParser, ESPNParser
+from footcal.parsers import get_parsers
 
 
 @click.group()  # type: ignore
@@ -54,27 +54,24 @@ def footcal(
 # mypy disabled where the following error was being
 # reported:
 #   Untyped decorator makes function "espn" untyped
-@footcal.command()  # type: ignore
+@footcal.command(name="create-calendar")  # type: ignore
+@click.option(  # type: ignore
+    "--parser",
+    "-p",
+    type=click.Choice(list(get_parsers().keys())),
+    default=list(get_parsers().keys())[0],
+    help="Web fixture parser.",
+    show_default=True,
+    required=True,
+)
 @click.pass_context  # type: ignore
-def espn(ctx: click.core.Context) -> None:
-    """Fixures from ESPN website."""
-    parser = ESPNParser(
+def create_calendar(ctx: click.core.Context, parser: str) -> None:
+    """Create calendar from web fixtures."""
+    parser_class = get_parsers()[parser]
+    parser_instance = parser_class(
         timezone_id=ctx.parent.params["timezone"], locale=ctx.parent.params["locale"]
     )
-    calendar = parser.get_calendar(
-        url=ctx.parent.params["url"], calendar_name=ctx.parent.params["name"]
-    )
-    print(calendar.to_ical().decode("utf-8"))
-
-
-@footcal.command()  # type: ignore
-@click.pass_context  # type: ignore
-def espnapi(ctx: click.core.Context) -> None:
-    """Fixures from ESPN API."""
-    parser = ESPNAPIParser(
-        timezone_id=ctx.parent.params["timezone"], locale=ctx.parent.params["locale"]
-    )
-    calendar = parser.get_calendar(
+    calendar = parser_instance.get_calendar(
         url=ctx.parent.params["url"], calendar_name=ctx.parent.params["name"]
     )
     print(calendar.to_ical().decode("utf-8"))

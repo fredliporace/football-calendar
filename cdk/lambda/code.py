@@ -5,7 +5,7 @@ import logging
 import os
 from typing import Any, Dict
 
-from footcal.parsers import ESPNAPIParser, ESPNParser  # pylint: disable=unused-import
+from footcal.parsers import get_parsers
 
 logging.getLogger("botocore.credentials").disabled = True
 LOGGER = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ def handler(
     LOGGER.info(os.environ["PARSER"])
     LOGGER.info(os.environ["PARSER_CTOR_ARGS"])
     LOGGER.info(os.environ["PARSER_GET_CALENDAR_ARGS"])
-    parser_ctor = globals()[os.environ["PARSER"]]
+    parser_ctor = get_parsers()[os.environ["PARSER"]]
     parser = parser_ctor(**(json.loads(os.environ["PARSER_CTOR_ARGS"])))
     calendar = parser.get_calendar(
         **(json.loads(os.environ["PARSER_GET_CALENDAR_ARGS"]))

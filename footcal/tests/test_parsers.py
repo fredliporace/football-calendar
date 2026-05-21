@@ -4,8 +4,8 @@ from datetime import datetime
 
 import pytest
 
-from footcal import Match
-from footcal.parsers import ESPNAPIParser, ESPNParser, Parser
+from footcal.match import Match
+from footcal.parsers import ESPNAPIParser, ESPNParser, Parser, get_parsers
 
 # protected access for testing purposes only
 # pylint: disable=protected-access
@@ -126,3 +126,11 @@ def test_parser_from_name() -> None:
     assert len(matches) > 0
     with pytest.raises(KeyError):
         ctor = globals()["UndefinedParser"]
+
+
+def test_get_parsers() -> None:
+    """test_get_parsers."""
+    parsers = get_parsers()
+    assert sorted(list(parsers.keys())) == ["ESPNAPIParser", "ESPNParser"]
+    assert parsers["ESPNParser"].__name__ == "ESPNParser"
+    assert parsers["ESPNAPIParser"].__name__ == "ESPNAPIParser"

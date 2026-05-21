@@ -1,9 +1,11 @@
 """parsers module."""
 
+import inspect
 import json
+import sys
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import Dict, List, Optional, Type
 
 import requests
 from babel.dates import get_month_names
@@ -12,7 +14,7 @@ from icalendar import Calendar, Event
 from pydantic import BaseModel
 from pytz import timezone
 
-from footcal import Match
+from footcal.match import Match
 
 
 class Parser(BaseModel, ABC):
@@ -171,3 +173,12 @@ class ESPNAPIParser(Parser):
                 )
             )
         return matches
+
+
+def get_parsers() -> Dict[str, Type[Parser]]:
+    """Return a dictionary of all available parsers."""
+    parsers = {}
+    for name, obj in inspect.getmembers(sys.modules[__name__]):
+        if inspect.isclass(obj) and issubclass(obj, Parser) and obj is not Parser:
+            parsers[name] = obj
+    return parsers

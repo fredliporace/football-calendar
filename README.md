@@ -14,41 +14,7 @@ Clone the repository and:
 pip install -e .[cli]
 ```
 
-The main command is `footcal`:
-
-```bash
-Usage: footcal [OPTIONS] COMMAND [ARGS]...
-
-  Create an icalendar from web fixtures.
-
-  The calendar is dumped to stdout.
-
-Options:
-  -n, --name TEXT      Calendar name.  [default: Calendar]
-  -t, --timezone TEXT  Calendar timezone.  [default: UTC]
-  -l, --locale TEXT    Locale used to parse data such as month abbreviated
-                       names.  [default: pt_BR]
-  -u, --url TEXT       URL for fixtures.  [default: https://www.espn.com.br/fu
-                       tebol/time/calendario/_/id/3445/fluminense; required]
-  --help               Show this message and exit.
-
-Commands:
-  espn  Fixures from ESPN website.
-```
-
-Example using default options and ESPN site:
-
-```bash
-(fb) [liporace@localhost football-calendar]$ footcal espn
-BEGIN:VCALENDAR
-NAME:Calendar
-BEGIN:VEVENT
-SUMMARY:Fluminense x Botafogo
-DTSTART:20240303T140000Z
-DTEND:20240303T154500Z
-END:VEVENT
-END:VCALENDAR
-```
+The main command is `footcal`, use `footcal --help` for usage instructions.
 
 ## AWS lambda function
 

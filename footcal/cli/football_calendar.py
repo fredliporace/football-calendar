@@ -2,7 +2,7 @@
 
 import click
 
-from footcal.parsers import ESPNParser
+from footcal.parsers import ESPNAPIParser, ESPNParser
 
 
 @click.group()  # type: ignore
@@ -40,10 +40,10 @@ from footcal.parsers import ESPNParser
     show_default=True,
 )
 def footcal(
-    name: click.STRING,  # pylint: disable=unused-argument
-    timezone: click.STRING,  # pylint: disable=unused-argument
-    locale: click.STRING,  # pylint: disable=unused-argument
-    url: click.STRING,  # pylint: disable=unused-argument
+    name: str,  # pylint: disable=unused-argument
+    timezone: str,  # pylint: disable=unused-argument
+    locale: str,  # pylint: disable=unused-argument
+    url: str,  # pylint: disable=unused-argument
 ) -> None:
     """Create an icalendar from web fixtures.
 
@@ -59,6 +59,19 @@ def footcal(
 def espn(ctx: click.core.Context) -> None:
     """Fixures from ESPN website."""
     parser = ESPNParser(
+        timezone_id=ctx.parent.params["timezone"], locale=ctx.parent.params["locale"]
+    )
+    calendar = parser.get_calendar(
+        url=ctx.parent.params["url"], calendar_name=ctx.parent.params["name"]
+    )
+    print(calendar.to_ical().decode("utf-8"))
+
+
+@footcal.command()  # type: ignore
+@click.pass_context  # type: ignore
+def espnapi(ctx: click.core.Context) -> None:
+    """Fixures from ESPN API."""
+    parser = ESPNAPIParser(
         timezone_id=ctx.parent.params["timezone"], locale=ctx.parent.params["locale"]
     )
     calendar = parser.get_calendar(

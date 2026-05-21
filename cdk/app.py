@@ -26,8 +26,9 @@ class FootcalStack(Stack):  # type: ignore
         # Copy lambda code to build directory and install python dependencies there
         retcode = call("cp -u ./lambda/code.py ../cdk_build/lambda", shell=True)
         assert retcode == 0
+        # We need --upgrade here since footcal itself must be installed
         retcode = call(
-            "cd ../ && pip install . -t ./cdk_build/lambda/ -c constraints.txt -q -q",
+            "cd ../ && pip install . --upgrade -t ./cdk_build/lambda/ -c constraints.txt -q -q",
             shell=True,
         )
         assert retcode == 0

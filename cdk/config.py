@@ -9,6 +9,7 @@ class StackSettings(BaseSettings):  # pylint: disable=too-few-public-methods
     parser: str
     parser_ctor_args: str
     parser_get_calendar_args: str
+    notification_email: str
 
     class Config:  # pylint: disable=too-few-public-methods
         """model config."""

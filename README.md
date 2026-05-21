@@ -14,41 +14,7 @@ Clone the repository and:
 pip install -e .[cli]
 ```
 
-The main command is `footcal`:
-
-```bash
-Usage: footcal [OPTIONS] COMMAND [ARGS]...
-
-  Create an icalendar from web fixtures.
-
-  The calendar is dumped to stdout.
-
-Options:
-  -n, --name TEXT      Calendar name.  [default: Calendar]
-  -t, --timezone TEXT  Calendar timezone.  [default: UTC]
-  -l, --locale TEXT    Locale used to parse data such as month abbreviated
-                       names.  [default: pt_BR]
-  -u, --url TEXT       URL for fixtures.  [default: https://www.espn.com.br/fu
-                       tebol/time/calendario/_/id/3445/fluminense; required]
-  --help               Show this message and exit.
-
-Commands:
-  espn  Fixures from ESPN website.
-```
-
-Example using default options and ESPN site:
-
-```bash
-(fb) [liporace@localhost football-calendar]$ footcal espn
-BEGIN:VCALENDAR
-NAME:Calendar
-BEGIN:VEVENT
-SUMMARY:Fluminense x Botafogo
-DTSTART:20240303T140000Z
-DTEND:20240303T154500Z
-END:VEVENT
-END:VCALENDAR
-```
+The main command is `footcal`, use `footcal --help` for usage instructions.
 
 ## AWS lambda function
 
@@ -57,10 +23,10 @@ The application may be deployed to AWS using CDK2.
 ### CDK configuration
 
 Requirements:
-* node: Use [nvm](https://heynode.com/tutorial/install-nodejs-locally-nvm/) to make sure a supported node is being used, tested with 18.0.0
+* node: Use [nvm](https://heynode.com/tutorial/install-nodejs-locally-nvm/) to make sure a supported node is being used, tested with 24.0.0
 * AWS credentials configured
 
-To install and check AWS CDK (tested with CDK 2.130.0):
+To install and check AWS CDK (tested with CDK 2.1124.1):
 ```bash
 $ npm install -g aws-cdk
 $ cdk --version
@@ -90,8 +56,9 @@ FOOTCAL_PARSER_CTOR_ARGS='{
 }'
 FOOTCAL_PARSER_GET_CALENDAR_ARGS='{
         "url":"https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense",
-        "calendar_name":"Calendar"
+         "calendar_name":"Calendar"
 }'
+FOOTCAL_NOTIFICATION_EMAIL="myemail@example.com"
 ```
 
 To deploy to lambda function:
@@ -111,12 +78,13 @@ Install the package with *edit* mode and with the `dev` extra:
 $ pip install -e .[dev]
 ```
 
-Install `pre-commit` to run *isort*, *pylint*, *pydocstring*, *black* and *mypy* when committing new code.
+Install `pre-commit` to run *isort*, *pylint*, *pydocstyle*, *black* and *mypy* when committing new code.
 ```bash
 $ pre-commit install
 ```
 
 ### act
+
 
 Use [act](https://github.com/nektos/act) to test github actions locally:
 

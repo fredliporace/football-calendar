@@ -1,8 +1,11 @@
 """parsers module."""
 
+import inspect
+import json
+import sys
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import Dict, List, Optional, Type
 
 import requests
 from babel.dates import get_month_names
@@ -11,7 +14,7 @@ from icalendar import Calendar, Event
 from pydantic import BaseModel
 from pytz import timezone
 
-from footcal import Match
+from footcal.match import Match
 
 
 class Parser(BaseModel, ABC):
@@ -32,7 +35,8 @@ class Parser(BaseModel, ABC):
 
     def get_matches(self, url: str) -> List[Match]:
         """Get matches from a given URL."""
-        req = requests.get(
+        session = requests.Session()
+        req = session.get(
             url,
             headers={
                 "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) "
@@ -64,6 +68,8 @@ class Parser(BaseModel, ABC):
         """
         cal = Calendar()
         cal.add("name", calendar_name)
+        cal.prodid = "footcal"
+        cal.version = datetime.now().isoformat()
         for match in matches:
             event = Event()
             event.add("summary", f"{match.home_team} x {match.away_team}")
@@ -137,3 +143,42 @@ class ESPNParser(Parser):
                     # {tds[3].text} {tds[4].text} {tds[5].text}")
                     # print(match)
         return matches
+
+
+class ESPNAPIParser(Parser):
+    """Parser from ESPN API fixture site."""
+
+    def matches_from_str(self, html_text: str) -> List[Match]:
+        """todo: reference documentation from base class."""
+        jdoc = json.loads(html_text)
+        assert jdoc["status"] == "success"
+        matches = []
+        for match in jdoc["events"]:
+            dt_start = datetime.fromisoformat(match["date"])
+            if match["timeValid"]:
+                dt_end = dt_start + timedelta(minutes=105)
+            else:
+                # Time is not defined, adding as a full day event
+                dt_end = None
+            matches.append(
+                Match(
+                    home_team=match["competitions"][0]["competitors"][0]["team"][
+                        "displayName"
+                    ],
+                    away_team=match["competitions"][0]["competitors"][1]["team"][
+                        "displayName"
+                    ],
+                    dt_start=dt_start,
+                    dt_end=dt_end,
+                )
+            )
+        return matches
+
+
+def get_parsers() -> Dict[str, Type[Parser]]:
+    """Return a dictionary of all available parsers."""
+    parsers = {}
+    for name, obj in inspect.getmembers(sys.modules[__name__]):
+        if inspect.isclass(obj) and issubclass(obj, Parser) and obj is not Parser:
+            parsers[name] = obj
+    return parsers

@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from footcal import Match
+from footcal.match import Match
 
 
 def test_match() -> None:

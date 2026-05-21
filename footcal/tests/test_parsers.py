@@ -1,10 +1,11 @@
 """test parsers."""
+
 from datetime import datetime
 
 import pytest
 
-from footcal import Match
-from footcal.parsers import ESPNParser, Parser
+from footcal.match import Match
+from footcal.parsers import ESPNAPIParser, ESPNParser, Parser, get_parsers
 
 # protected access for testing purposes only
 # pylint: disable=protected-access
@@ -26,8 +27,13 @@ def test_parser_calendar_from_matches() -> None:
         ),
     ]
     cal = Parser._calendar_from_matches(calendar_name="Fluminense", matches=matches)
+    cc = cal.to_ical().decode("utf-8")
+    # Split in two parts to avoid checking the version which is
+    # generated with the current date and time.
+    ccsplit = cc.split("VERSION:")
+    assert ccsplit[0].encode("utf-8") == b"BEGIN:VCALENDAR\r\n"
     assert (
-        cal.to_ical() == b"BEGIN:VCALENDAR\r\nNAME:Fluminense\r\n"
+        ccsplit[1][28:].encode("utf-8") == b"PRODID:footcal\r\nNAME:Fluminense\r\n"
         b"BEGIN:VEVENT\r\nSUMMARY:Fluminense x Rio Cricket Athletic\r\n"
         b"DTSTART:20150101T123059\r\nDTEND:20150101T123059\r\nEND:"
         b"VEVENT\r\nBEGIN:VEVENT\r\nSUMMARY:Fluminense x Rio Cricket Athletic\r\n"
@@ -38,7 +44,10 @@ def test_parser_calendar_from_matches() -> None:
 def test_parser_subclasses() -> None:
     """test_parser_subclasses."""
     subclasses = Parser.__subclasses__()
-    assert sorted([subclass.__name__ for subclass in subclasses]) == ["ESPNParser"]
+    assert sorted([subclass.__name__ for subclass in subclasses]) == [
+        "ESPNAPIParser",
+        "ESPNParser",
+    ]
 
 
 def test_parser() -> None:
@@ -53,7 +62,7 @@ def test_parser() -> None:
 
 def test_espn_parser() -> None:
     """test_espn_parser."""
-    espn = ESPNParser(utc_offset=-4)
+    espn = ESPNParser()
 
     # Check last available format
     with open("footcal/tests/fixtures/espn_flu.html", encoding="utf-8") as fin:
@@ -66,16 +75,44 @@ def test_espn_parser() -> None:
     # "2022-05-26T20:30:00-04:00" originally
     assert matches[0].dt_start.isoformat()[:-6] == "2022-05-26T20:30:00"
 
+    # Commented out since web access now returns 202 and not 200
+    # # Check current online format, test here is limited since it
+    # # is not guaranteed that there will be a match. Anyway this works
+    # # as a canary to flag format changes.
+    # test_url = "https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense"
+    # matches = espn.get_matches(url=test_url)
+    # assert len(matches) > 0
+
+    # calendar = espn.get_calendar(url=test_url, calendar_name="test")
+    # assert not calendar.is_empty()
+    # assert calendar.validate()
+
+
+def test_espn_api_parser() -> None:
+    """test_espn_api_parser."""
+    espn = ESPNAPIParser()
+
+    # Check last available format
+    with open("footcal/tests/fixtures/espn_api_flu.json", encoding="utf-8") as fin:
+        html_text = fin.read()
+    matches = espn.matches_from_str(html_text=html_text)
+    assert len(matches) == 23
+    # API always returns UTC time
+    assert matches[0].dt_start.isoformat() == "2026-05-23T22:00:00+00:00"
+
+    calendar = espn._calendar_from_matches(calendar_name="test", matches=matches)
+    assert not calendar.is_empty()
+    calendar.validate()
+
     # Check current online format, test here is limited since it
     # is not guaranteed that there will be a match. Anyway this works
     # as a canary to flag format changes.
-    test_url = "https://www.espn.com.br/futebol/time/calendario/_/id/3445/fluminense"
+    test_url = (
+        "http://site.api.espn.com/apis/site/v2/sports"
+        "/soccer/all/teams/3445/schedule?fixture=true"
+    )
     matches = espn.get_matches(url=test_url)
     assert len(matches) > 0
-
-    calendar = espn.get_calendar(url=test_url, calendar_name="test")
-    assert not calendar.is_empty()
-    assert not calendar.is_broken
 
 
 def test_parser_from_name() -> None:
@@ -89,3 +126,11 @@ def test_parser_from_name() -> None:
     assert len(matches) > 0
     with pytest.raises(KeyError):
         ctor = globals()["UndefinedParser"]
+
+
+def test_get_parsers() -> None:
+    """test_get_parsers."""
+    parsers = get_parsers()
+    assert sorted(list(parsers.keys())) == ["ESPNAPIParser", "ESPNParser"]
+    assert parsers["ESPNParser"].__name__ == "ESPNParser"
+    assert parsers["ESPNAPIParser"].__name__ == "ESPNAPIParser"
